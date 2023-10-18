@@ -153,29 +153,29 @@ vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bool isD
 vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool isDecrypt) {
     if (!isDecrypt) { //perform shift rows for encryption
         //swap elements in second row
-        swap(state[4], state[5]);
-        swap(state[5], state[6]);
-        swap(state[6], state[7]);
+        swap(state[1], state[5]);
+        swap(state[5], state[9]);
+        swap(state[9], state[13]);
         //swap elements in third row
-        swap(state[8], state[10]);
-        swap(state[9], state[11]);
+        swap(state[2], state[10]);
+        swap(state[6], state[14]);
         //swap elements in fourth row
-        swap(state[14], state[15]);
-        swap(state[13], state[14]);
-        swap(state[12], state[13]);
+        swap(state[15], state[11]);
+        swap(state[11], state[7]);
+        swap(state[7], state[3]);
     }
     else { //perform inverse shift rows for decryption
         //swap elements in second row
-        swap(state[6], state[7]);
-        swap(state[5], state[6]);
-        swap(state[4], state[5]);
+        swap(state[13], state[9]);
+        swap(state[9], state[5]);
+        swap(state[5], state[1]);
         //swap elements in third row
-        swap(state[8], state[10]);
-        swap(state[9], state[11]);
+        swap(state[2], state[10]);
+        swap(state[6], state[14]);
         //swap elements in fourth row
-        swap(state[12], state[13]);
-        swap(state[13], state[14]);
-        swap(state[14], state[15]);
+        swap(state[3], state[7]);
+        swap(state[7], state[11]);
+        swap(state[11], state[15]);
     }
     return state; //return shifted state vector
 }
@@ -276,19 +276,17 @@ int main() {
         cout << dec << endl; //restore the output stream to decimal mode after each row
     }
 
-    ///test of shift rows///
+    //test of shift rows///
     //vector<unsigned char> lol = {
-    //0x34, 0x02, 0xD6, 0x30,
-    //0xD8, 0x0D, 0x2F, 0x60,
-    //0x0D, 0x44, 0x60, 0xD9,
-    //0x1C, 0x3F, 0x5C, 0x5A
+    //0x34, 0xD8, 0x0D, 0x1C,
+    //0x02, 0x0D, 0x44, 0x3F,
+    //0xD6, 0x2F, 0x60, 0x5C,
+    //0x30, 0x60, 0xD9, 0x5A
     //};
     //lol = AES::ShiftRows(lol);
-    //    for (unsigned char element : lol) {
-    //        //set the output stream to hexadecimal mode and specify the width and fill
-    //        cout << hex << setw(2) << setfill('0') << static_cast<int>(element) << " ";
-    //    }
-    //    cout << dec << endl; //restore the output stream to decimal mode after each row
+    //for (unsigned char element : lol) {
+    //    cout << hex << setw(2) << setfill('0') << static_cast<int>(element) << " ";
+    //}
 
     return 0;
 }

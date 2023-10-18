@@ -153,29 +153,25 @@ vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bool isD
 vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool isDecrypt) {
     if (!isDecrypt) { //perform shift rows for encryption
         //swap elements in second row
-        swap(state[1], state[5]);
-        swap(state[5], state[9]);
-        swap(state[9], state[13]);
+        for (int i = 1; i <= 9; i += Nb) //iterate on second row
+            swap(state[i], state[i + Nb]); //swap elements
         //swap elements in third row
-        swap(state[2], state[10]);
-        swap(state[6], state[14]);
+        for (int i = 2; i <= 6; i += Nb) //iterate on third row
+            swap(state[i], state[i + (Nb * 2)]); //swap elements
         //swap elements in fourth row
-        swap(state[15], state[11]);
-        swap(state[11], state[7]);
-        swap(state[7], state[3]);
+        for (int i = 15; i >= 7; i -= Nb) //iterate on fourth row
+            swap(state[i], state[i - Nb]); //swap elements
     }
     else { //perform inverse shift rows for decryption
         //swap elements in second row
-        swap(state[13], state[9]);
-        swap(state[9], state[5]);
-        swap(state[5], state[1]);
+        for (int i = 13; i >= 5; i -= Nb) //iterate on second row
+            swap(state[i], state[i - Nb]); // swap elements
         //swap elements in third row
-        swap(state[2], state[10]);
-        swap(state[6], state[14]);
+        for (int i = 2; i <= 6; i += Nb) //iterate on third row
+            swap(state[i], state[i + (Nb * 2)]); //swap elements
         //swap elements in fourth row
-        swap(state[3], state[7]);
-        swap(state[7], state[11]);
-        swap(state[11], state[15]);
+        for (int i = 3; i <= 11; i += Nb) //iterate on fourth row
+            swap(state[i], state[i + Nb]); //swap elements
     }
     return state; //return shifted state vector
 }
@@ -284,6 +280,7 @@ int main() {
     //0x30, 0x60, 0xD9, 0x5A
     //};
     //lol = AES::ShiftRows(lol);
+    //lol = AES::ShiftRows(lol, true);
     //for (unsigned char element : lol) {
     //    cout << hex << setw(2) << setfill('0') << static_cast<int>(element) << " ";
     //}

@@ -347,20 +347,29 @@ vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool i
 
 
 /// <summary>
-/// Function for XOR operation between two vectors in same size.
+/// Function for XOR operation between two vectors in same size, vectors immutable if flag is set. 
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; first"></param>
 /// <param name="vector&lt;unsigned char&gt; second"></param>
+/// <param name="bool immutable"></param>
 /// <returns>vector&lt;unsigned char&gt; xor</returns>
-vector<unsigned char> AES::XOR(const vector<unsigned char>& first, const vector<unsigned char>& second) {
-    vector<unsigned char> result;
-    if (first.size() == second.size()) { //if same size we continue
+vector<unsigned char> AES::XOR(vector<unsigned char>& first, vector<unsigned char>& second, const bool immutable) {
+    if (first.size() != second.size()) { //if not same size we exit the function
+        return first; //return first vector as indication for failure
+    }
+    if (immutable) { //perform XOR operation with new vector, keep given vectors unchanged
+        vector<unsigned char> result; //create new vector for XOR result
         result.reserve(first.size()); //reserve memory for vector
         for (size_t i = 0; i < first.size(); i++) { //iterate over the vectors
             result.push_back(first[i] ^ second[i]); //push to new vector the new XOR'ed elements 
         }
+        return result; //return XOR result
     }
-    return result; //return result
+    else { //perform XOR operation in place with first vector
+        for (size_t i = 0; i < first.size(); i++) //iterate over the vectors
+            first[i] ^= second[i]; //perform XOR on vectors elements
+        return first; //return first vector with XOR result
+    }
 }
 
 

@@ -21,7 +21,7 @@ private:
 	static const size_t BlockSize = Nb * Nb; //represents the size of AES block that is always 16 bytes (128-bit)
 
 public:
-	static const vector<unsigned char> AES_Cipher(vector<unsigned char>& text, vector<unsigned char>& key, const bool isDecrypt=false);
+	static const vector<unsigned char> AES_Cipher(vector<unsigned char>& plaintext, vector<unsigned char>& key, const bool isDecrypt=false);
 	static const vector<vector<unsigned char>> KeySchedule(const vector<unsigned char>& key, const bool isDecrypt=false);
 	static void SetOperationMode(const size_t textSize, const size_t keySize);
 	static void PrintVector(const vector<unsigned char>& vector);

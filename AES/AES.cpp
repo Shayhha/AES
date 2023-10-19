@@ -440,30 +440,31 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
 
 
 /// <summary>
-/// Function that applies AES encryption or decryption based on state of isDecrypt flag, supports AES-128, AES-192 and AES-256.
+/// Function that applies AES encryption or decryption based on state of isDecrypt flag, supports AES-128, AES-192 and AES-256. 
+/// <para>This function throws runtime error if given plaintext or key are invalid.</para>
 /// </summary>
-/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; plaintext"></param>
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <param name="bool isDecrypt"></param>
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
-const vector<unsigned char> AES::AES_Cipher(vector<unsigned char>& text, vector<unsigned char>& key, const bool isDecrypt) {
-    SetOperationMode(text.size(), key.size()); //call our SetOperationMode function to check plaintext and key and set correct AES mode
+const vector<unsigned char> AES::AES_Cipher(vector<unsigned char>& plaintext, vector<unsigned char>& key, const bool isDecrypt) {
+    SetOperationMode(plaintext.size(), key.size()); //call our SetOperationMode function to check plaintext and key and set correct AES mode
     vector<vector<unsigned char>> roundKeys = KeySchedule(key, isDecrypt); //call our KeySchedule function for generating round keys
     //apply initial round key
-    text = XOR(text, roundKeys[0]); //perform first AddRoundKey operation on plaintext
+    plaintext = XOR(plaintext, roundKeys[0]); //perform first AddRoundKey operation on plaintext
     //apply AES operations SubByte, ShiftRows, MixColumns and AddRoundKey
     for (int i = 1; i < Nr; i++) { //iterate over roundKeys and apply AES operations
-        text = SubBytes(text, isDecrypt); //perform SubBytes operation on plaintext
-        text = ShiftRows(text, isDecrypt); //perform ShiftRows operation on plaintext
-        text = MixColumns(text, isDecrypt); //perform MixColumns operation on plaintext
-        text = XOR(text, roundKeys[i]); //perform AddRoundKey operation on plaintext
+        plaintext = SubBytes(plaintext, isDecrypt); //perform SubBytes operation on plaintext
+        plaintext = ShiftRows(plaintext, isDecrypt); //perform ShiftRows operation on plaintext
+        plaintext = MixColumns(plaintext, isDecrypt); //perform MixColumns operation on plaintext
+        plaintext = XOR(plaintext, roundKeys[i]); //perform AddRoundKey operation on plaintext
     }
     //apply AES final round operations SubBytes, ShiftRows, AddRoundKey
-    text = SubBytes(text, isDecrypt); //perform final SubBytes operation on plaintext
-    text = ShiftRows(text, isDecrypt); //perform final ShiftRows operation on plaintext
-    text = XOR(text, roundKeys[Nr]); //perform final AddRoundKey operation on plaintext
+    plaintext = SubBytes(plaintext, isDecrypt); //perform final SubBytes operation on plaintext
+    plaintext = ShiftRows(plaintext, isDecrypt); //perform final ShiftRows operation on plaintext
+    plaintext = XOR(plaintext, roundKeys[Nr]); //perform final AddRoundKey operation on plaintext
     roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
-    return text; //return final plaintext cipher
+    return plaintext; //return final plaintext cipher
 }
 
 

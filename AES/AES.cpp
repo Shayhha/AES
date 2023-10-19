@@ -447,7 +447,23 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
 /// <param name="bool isDecrypt"></param>
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
 const vector<unsigned char> AES::AES_Cipher(vector<unsigned char>& text, vector<unsigned char>& key, const bool isDecrypt) {
-    return text; //TODO//
+    SetOperationMode(text.size(), key.size()); //call our SetOperationMode function to check plaintext and key and set correct AES mode
+    vector<vector<unsigned char>> roundKeys = KeySchedule(key, isDecrypt); //call our KeySchedule function for generating round keys
+    //apply initial round key
+    text = XOR(text, roundKeys[0]); //perform first AddRoundKey operation on plaintext
+    //apply AES operations SubByte, ShiftRows, MixColumns and AddRoundKey
+    for (int i = 1; i < Nr; i++) { //iterate over roundKeys and apply AES operations
+        text = SubBytes(text, isDecrypt); //perform SubBytes operation on plaintext
+        text = ShiftRows(text, isDecrypt); //perform ShiftRows operation on plaintext
+        text = MixColumns(text, isDecrypt); //perform MixColumns operation on plaintext
+        text = XOR(text, roundKeys[i]); //perform AddRoundKey operation on plaintext
+    }
+    //apply AES final round operations SubBytes, ShiftRows, AddRoundKey
+    text = SubBytes(text, isDecrypt); //perform final SubBytes operation on plaintext
+    text = ShiftRows(text, isDecrypt); //perform final ShiftRows operation on plaintext
+    text = XOR(text, roundKeys[Nr]); //perform final AddRoundKey operation on plaintext
+    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    return text; //return final plaintext cipher
 }
 
 

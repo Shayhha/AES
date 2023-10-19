@@ -171,24 +171,33 @@ const unsigned char AES::GaloisMult[15][256] = {
 
 
 /// <summary>
-/// Function that handles the operation mode of AES encryption.
+/// Function that handles the operation mode of AES encryption, this function throws runtime error if plaintext or key aren't valid.
 /// </summary>
-/// <param name="int blockSize"></param>
-void AES::SetOperationMode(const int blockSize) {
-    if (blockSize == 16) { //if blockSize is 16 bytes (128 bits)
+/// <param name="size_t textSize"></param>
+/// <param name="size_t keySize"></param>
+void AES::SetOperationMode(const size_t textSize, const size_t keySize) {
+    bool isKeyValid = true; //create new flag for indicating if keySize is valid
+    if (keySize == 16) { //if keySize is 16 bytes (128 bits)
         AES::Nk = 4; //number of 32-bit words in the key (AES-128)
         AES::Nr = 10; //number of rounds (AES-128 has 10 rounds)
     }
-    else if (blockSize == 24) { //if blockSize is 24 bytes (192 bits)
+    else if (keySize == 24) { //if keySize is 24 bytes (192 bits)
         AES::Nk = 6; //number of 32-bit words in the key (AES-192)
         AES::Nr = 12; //number of rounds (AES-192 has 12 rounds)
     }
-    else if (blockSize == 32) { //if blockSize is 32 bytes (256 bits)
+    else if (keySize == 32) { //if keySize is 32 bytes (256 bits)
         AES::Nk = 8; //number of 32-bit words in the key (AES-256)
         AES::Nr = 14; //number of rounds (AES-256 has 14 rounds)
     }
-    else //else blockSize isn't valid
-        throw runtime_error("Invalid mode of operation, please provide key that matches AES requirements."); //we throw a runtime error
+    else //else keySize isn't valid
+        isKeyValid = false; //set isKeyValid to false
+
+    if (textSize != BlockSize && !isKeyValid) //if true both plaintext and key aren't valid so we throw runtime error
+        throw runtime_error("Invalid mode of operation, please provide valid plaintext and key that matches AES requirements."); //we throw a runtime error
+    else if(textSize != BlockSize && isKeyValid) //if true plaintext isn't valid so we throw runtime error
+        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES requirements."); //we throw a runtime error
+    else if (textSize == BlockSize && !isKeyValid) //if true key isn't valid so we throw runtime error
+        throw runtime_error("Invalid mode of operation, please provide valid key that matches AES requirements."); //we throw a runtime error
 }
 
 
@@ -452,7 +461,7 @@ int main() {
     //};
 
     vector<unsigned char> key(16, 0x00);
-    //AES::SetOperationMode(key.size());
+    //AES::SetOperationMode(16, key.size());
     vector<vector<unsigned char>> keys = AES::KeySchedule(key);
     AES::PrintMatrix(keys);
     

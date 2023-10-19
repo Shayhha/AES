@@ -387,7 +387,7 @@ vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned char>
 /// <returns>vector&lt;vector&lt;unsigned char&gt;&gt; roundKeys</returns>
 const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>& key, const bool isDecrypt) {
     vector<vector<unsigned char>> roundKeysMatrix; //initialize the matrix of round keys (each represented as a vector of unsigned char)
-    roundKeysMatrix.reserve(Nr + 1); //reserve memory for our keys in advance for better performace
+    roundKeysMatrix.reserve(Nr + 1); //reserve memory for our keys in advance for better performance
     vector<unsigned char> roundKeysVector; //initialize new round keys vector
     copy(key.begin(), key.end(), back_inserter(roundKeysVector)); //add initial key to roundKey vector
 

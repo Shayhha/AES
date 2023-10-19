@@ -30,6 +30,7 @@ public:
 	static const unsigned char Rcon(const unsigned char& value);
 	static vector<unsigned char> SubBytes(vector<unsigned char>& state, const bool isDecrypt = false);
 	static vector<unsigned char> ShiftRows(vector<unsigned char>& state, const bool isDecrypt=false);
+	static vector<unsigned char> MixColumns(vector<unsigned char>& state, const bool isDecrypt = false);
 	static vector<unsigned char> XOR(const vector<unsigned char>& a, const vector<unsigned char>& b);
 	static vector<vector<unsigned char>> SplitIntoKeyWords(const vector<unsigned char>& key);
 };

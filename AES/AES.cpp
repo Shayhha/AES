@@ -316,6 +316,37 @@ vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool is
 
 
 /// <summary>
+/// Function for mixing columns using GaloisMult tables for AES encryption, both for encryption and decryption.
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; state"></param>
+/// <param name="bool isDecrypt"></param>
+/// <returns>vector&lt;unsigned char&gt; mixedState</returns>
+vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool isDecrypt) {
+    if (!isDecrypt) { //perform mix columns for encryption
+        for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
+            vector<unsigned char> temp{ state[i + 0], state[i + 1], state[i + 2], state[i + 3] }; //temp vector represents current column values 
+            //apply Galois field equations for each byte in state vector
+            state[i + 0] = (unsigned char)(GaloisMult[2][temp[0]] ^ GaloisMult[3][temp[1]] ^ temp[2] ^ temp[3]);
+            state[i + 1] = (unsigned char)(temp[0] ^ GaloisMult[2][temp[1]] ^ GaloisMult[3][temp[2]] ^ temp[3]);
+            state[i + 2] = (unsigned char)(temp[0] ^ temp[1] ^ GaloisMult[2][temp[2]] ^ GaloisMult[3][temp[3]]);
+            state[i + 3] = (unsigned char)(GaloisMult[3][temp[0]] ^ temp[1] ^ temp[2] ^ GaloisMult[2][temp[3]]);
+        }
+    }
+    else { //perform mix columns for decryption
+        for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
+            vector<unsigned char> temp{ state[i + 0], state[i + 1], state[i + 2], state[i + 3] }; //temp vector represents current column values 
+            //apply Galois field equations for each byte in state vector
+            state[i + 0] = (unsigned char)(GaloisMult[14][temp[0]] ^ GaloisMult[11][temp[1]] ^ GaloisMult[13][temp[2]] ^ GaloisMult[9][temp[3]]);
+            state[i + 1] = (unsigned char)(GaloisMult[9][temp[0]] ^ GaloisMult[14][temp[1]] ^ GaloisMult[11][temp[2]] ^ GaloisMult[13][temp[3]]);
+            state[i + 2] = (unsigned char)(GaloisMult[13][temp[0]] ^ GaloisMult[9][temp[1]] ^ GaloisMult[14][temp[2]] ^ GaloisMult[11][temp[3]]);
+            state[i + 3] = (unsigned char)(GaloisMult[11][temp[0]] ^ GaloisMult[13][temp[1]] ^ GaloisMult[9][temp[2]] ^ GaloisMult[14][temp[3]]);
+        }
+    }
+    return state; //return state after mix columns
+}
+
+
+/// <summary>
 /// Function for XOR operation between two vectors in same size.
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; first"></param>
@@ -402,15 +433,15 @@ int main() {
     vector<vector<unsigned char>> keys = AES::KeySchedule(key);
     AES::PrintMatrix(keys);
     
-    //test of shift rows///
+    ///test of shift rows and mix columns///
     //vector<unsigned char> lol = {
-    //0x34, 0xD8, 0x0D, 0x1C,
-    //0x02, 0x0D, 0x44, 0x3F,
-    //0xD6, 0x2F, 0x60, 0x5C,
-    //0x30, 0x60, 0xD9, 0x5A
+    //0x85, 0x19, 0xBC, 0xED,
+    //0x6E, 0x13, 0x26, 0x8F,
+    //0x61, 0xE0, 0x85, 0xF6,
+    //0x3C, 0x82, 0xEA, 0xC2
     //};
-    //lol = AES::ShiftRows(lol);
-    //lol = AES::ShiftRows(lol, true);
+    ////AES::ShiftRows(lol);
+    //AES::MixColumns(lol);
     //AES::PrintVector(lol);
 
     return 0;

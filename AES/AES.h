@@ -23,6 +23,7 @@ private:
 public:
 	static const vector<vector<unsigned char>> KeySchedule(const vector<unsigned char>& key, const bool isDecrypt=false);
 	static void SetOperationMode(const int blockSize);
+	static void PrintVector(const vector<unsigned char>& vector);
 	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
 	static vector<unsigned char> RotWord(const vector<unsigned char>& word);
 	static vector<unsigned char> SubWord(const vector<unsigned char>& word);

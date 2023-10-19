@@ -193,13 +193,23 @@ void AES::SetOperationMode(const int blockSize) {
 
 
 /// <summary>
+/// Function for printing a vector array.
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; vector"></param>
+void AES::PrintVector(const vector<unsigned char>& vector) {
+    for (unsigned char element : vector) // iterate through each element
+        cout << hex << setw(2) << setfill('0') << (int)element << " "; //print each element in hexadecimal mode
+}
+
+
+/// <summary>
 /// Function for printing a matrix represented as vector of vectors.
 /// </summary>
 /// <param name="vector&lt;vector&lt;unsigned char&gt;&gt; matrix"></param>
 void AES::PrintMatrix(const vector<vector<unsigned char>>& matrix) {
     for (const vector<unsigned char>& row : matrix) {
         for (unsigned char element : row) //iterate through the inner vector (row)
-            cout << hex << setw(2) << setfill('0') << static_cast<int>(element) << " "; //set the output stream to hexadecimal mode
+            cout << hex << setw(2) << setfill('0') << (int)element << " "; //set the output stream to hexadecimal mode
         cout << dec << endl; //restore the output stream to decimal mode after each row
     }
 }
@@ -401,9 +411,7 @@ int main() {
     //};
     //lol = AES::ShiftRows(lol);
     //lol = AES::ShiftRows(lol, true);
-    //for (unsigned char element : lol) {
-    //    cout << hex << setw(2) << setfill('0') << static_cast<int>(element) << " ";
-    //}
+    //AES::PrintVector(lol);
 
     return 0;
 }

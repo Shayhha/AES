@@ -430,6 +430,18 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
 }
 
 
+/// <summary>
+/// Function that applies AES encryption or decryption based on state of isDecrypt flag, supports AES-128, AES-192 and AES-256.
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; key"></param>
+/// <param name="bool isDecrypt"></param>
+/// <returns>vector&lt;unsigned char&gt; cipherText</returns>
+const vector<unsigned char> AES::AES_Cipher(vector<unsigned char>& text, vector<unsigned char>& key, const bool isDecrypt) {
+    return text; //TODO//
+}
+
+
 
 int main() {
     //vector<unsigned char> key = {

@@ -502,13 +502,15 @@ int main() {
     //AES::PrintMatrix(keys);
 
     ///test AES encryption and decryption///
-    string plaintext = "BingChatAssistan";
-    string key = "BingChatAssistan";
+    string plaintext = "TheKingOfNewYork";
+    string key = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
     vector<unsigned char> keyVec(key.begin(), key.end());
     try {
         plaintextVec = AES::Encrypt(plaintextVec, keyVec);
+        cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
+        cout << "Original Text:" << endl;
         plaintextVec = AES::Decrypt(plaintextVec, keyVec);
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());

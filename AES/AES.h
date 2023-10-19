@@ -20,13 +20,9 @@ private:
 	static int Nr; //number of rounds (AES-128 has 10 rounds, AES-192 has 12 rounds, AES-256 has 14 rounds)
 	static const size_t BlockSize = Nb * Nb; //represents the size of AES block that is always 16 bytes (128-bit)
 
-public:
-	static const vector<unsigned char> Encrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
-	static const vector<unsigned char> Decrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
+protected:
 	static const vector<vector<unsigned char>> KeySchedule(const vector<unsigned char>& key);
 	static void SetOperationMode(const size_t textSize, const size_t keySize);
-	static void PrintVector(const vector<unsigned char>& vector);
-	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
 	static const vector<unsigned char> RotWord(const vector<unsigned char>& word);
 	static const vector<unsigned char> SubWord(const vector<unsigned char>& word);
 	static const unsigned char Rcon(const unsigned char& value);
@@ -35,5 +31,11 @@ public:
 	static const vector<unsigned char> MixColumns(vector<unsigned char>& state, const bool inverse=false);
 	static const vector<unsigned char> XOR(vector<unsigned char>& first, const vector<unsigned char>& second, const bool immutable=false);
 	static const vector<vector<unsigned char>> SplitIntoKeyWords(const vector<unsigned char>& key);
+
+public:
+	static const vector<unsigned char> Encrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
+	static const vector<unsigned char> Decrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
+	static void PrintVector(const vector<unsigned char>& vector);
+	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
 };
 #endif

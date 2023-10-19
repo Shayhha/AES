@@ -208,6 +208,7 @@ void AES::SetOperationMode(const size_t textSize, const size_t keySize) {
 void AES::PrintVector(const vector<unsigned char>& vector) {
     for (unsigned char element : vector) // iterate through each element
         cout << hex << setw(2) << setfill('0') << (int)element << " "; //print each element in hexadecimal mode
+    cout << endl; //print new line
 }
 
 
@@ -221,6 +222,7 @@ void AES::PrintMatrix(const vector<vector<unsigned char>>& matrix) {
             cout << hex << setw(2) << setfill('0') << (int)element << " "; //set the output stream to hexadecimal mode
         cout << dec << endl; //restore the output stream to decimal mode after each row
     }
+    cout << endl; //print new line
 }
 
 
@@ -470,18 +472,30 @@ const vector<unsigned char> AES::AES_Cipher(vector<unsigned char>& plaintext, ve
 
 
 int main() {
-    //vector<unsigned char> key = {
-    //0x2b, 0x7e, 0x15, 0x16,
-    //0x28, 0xae, 0xd2, 0xa6,
-    //0xab, 0xf7, 0x97, 0x22,
-    //0x33, 0x54, 0x91, 0xf5
-    //};
+    ///test key schedule///
+    //vector<unsigned char> key(16, 0x00);
+    ////AES::SetOperationMode(16, key.size());
+    //vector<vector<unsigned char>> keys = AES::KeySchedule(key);
+    //AES::PrintMatrix(keys);
 
-    vector<unsigned char> key(16, 0x00);
-    //AES::SetOperationMode(16, key.size());
-    vector<vector<unsigned char>> keys = AES::KeySchedule(key);
-    AES::PrintMatrix(keys);
-    
+
+    string plaintext = "BingChatAssistan";
+    string key = "BingChatAssistan";
+    vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
+    vector<unsigned char> keyVec(key.begin(), key.end());
+    AES::PrintVector(plaintextVec);
+    try {
+        plaintextVec = AES::AES_Cipher(plaintextVec, keyVec);
+        plaintextVec = AES::AES_Cipher(plaintextVec, keyVec, true);
+        AES::PrintVector(plaintextVec);
+        string str(plaintextVec.begin(), plaintextVec.end());
+        cout << str << endl;
+    }
+    catch (const runtime_error& e) {
+        cout << e.what();
+    }
+
+
     ///test of shift rows and mix columns///
     //vector<unsigned char> lol = {
     //0x85, 0x19, 0xBC, 0xED,

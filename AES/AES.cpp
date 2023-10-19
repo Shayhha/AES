@@ -371,7 +371,7 @@ vector<unsigned char> AES::XOR(const vector<unsigned char>& first, const vector<
 /// <returns>vector&lt;vector&lt;unsigned char&gt;&gt; splitKey</returns>
 vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned char>& key) {
     vector<vector<unsigned char>> KeyWordArray; //initialize new vector
-    for (int i = 0; i < key.size(); i += Nb) { //iterate over the given key vector
+    for (size_t i = 0; i < key.size(); i += Nb) { //iterate over the given key vector
         vector<unsigned char> block(key.begin() + i, key.begin() + i + Nb); //split the vector into blocks
         KeyWordArray.push_back(block); //push the block to the new vector
     }

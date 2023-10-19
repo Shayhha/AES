@@ -220,7 +220,7 @@ void AES::PrintMatrix(const vector<vector<unsigned char>>& matrix) {
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; word"></param>
 /// <returns>vector&lt;unsigned char&gt; rotatedWord</returns>
-vector<unsigned char> AES::RotWord(const vector<unsigned char>& word) {
+const vector<unsigned char> AES::RotWord(const vector<unsigned char>& word) {
     vector<unsigned char> result(Nb); //initialize a vector of size Nb
     //shift the word to the left by one position
     result[0] = word[1];
@@ -236,7 +236,7 @@ vector<unsigned char> AES::RotWord(const vector<unsigned char>& word) {
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; word"></param>
 /// <returns>vector&lt;unsigned char&gt; subWord</returns>
-vector<unsigned char> AES::SubWord(const vector<unsigned char>& word) {
+const vector<unsigned char> AES::SubWord(const vector<unsigned char>& word) {
     vector<unsigned char> result(Nb); //initialize a vector of size Nb
     for (int i = 0; i < Nb; i++) { //iterate over the word
         //we set the value from SBOX with right rotating by 4 to extract the left value and OR with 0x0F for extracting the right value
@@ -269,7 +269,7 @@ const unsigned char AES::Rcon(const unsigned char& value) {
 /// <param name="vector&lt;unsigned char&gt; state"></param>
 /// <param name="bool isDecrypt"></param>
 /// <returns>vector&lt;unsigned char&gt; subState</returns>
-vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bool isDecrypt) {
+const vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bool isDecrypt) {
     if (!isDecrypt) { //perform substitute bytes for encryption
         for (size_t i = 0; i < state.size(); i++) //iterate over state vector
             state[i] = SBOX[state[i] >> 4][state[i] & 0x0F]; //set correct value from SBOX
@@ -288,7 +288,7 @@ vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bool isD
 /// <param name="vector&lt;unsigned char&gt; state"></param>
 /// <param name="bool isDecrypt"></param>
 /// <returns>vector&lt;unsigned char&gt; shiftedState</returns>
-vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool isDecrypt) {
+const vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool isDecrypt) {
     if (!isDecrypt) { //perform shift rows for encryption
         //swap elements in second row
         for (int i = 1; i <= 9; i += Nb) //iterate on second row
@@ -321,7 +321,7 @@ vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool is
 /// <param name="vector&lt;unsigned char&gt; state"></param>
 /// <param name="bool isDecrypt"></param>
 /// <returns>vector&lt;unsigned char&gt; mixedState</returns>
-vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool isDecrypt) {
+const vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool isDecrypt) {
     if (!isDecrypt) { //perform mix columns for encryption
         for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
             vector<unsigned char> temp{ state[i + 0], state[i + 1], state[i + 2], state[i + 3] }; //temp vector represents current column values 
@@ -353,7 +353,7 @@ vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool i
 /// <param name="vector&lt;unsigned char&gt; second"></param>
 /// <param name="bool immutable"></param>
 /// <returns>vector&lt;unsigned char&gt; xor</returns>
-vector<unsigned char> AES::XOR(vector<unsigned char>& first, vector<unsigned char>& second, const bool immutable) {
+const vector<unsigned char> AES::XOR(vector<unsigned char>& first, vector<unsigned char>& second, const bool immutable) {
     if (first.size() != second.size()) { //if not same size we exit the function
         return first; //return first vector as indication for failure
     }
@@ -378,7 +378,7 @@ vector<unsigned char> AES::XOR(vector<unsigned char>& first, vector<unsigned cha
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <returns>vector&lt;vector&lt;unsigned char&gt;&gt; splitKey</returns>
-vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned char>& key) {
+const vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned char>& key) {
     vector<vector<unsigned char>> KeyWordArray; //initialize new vector
     KeyWordArray.reserve(key.size() / Nb); //reserve memory for blocks 
     for (size_t i = 0; i < key.size(); i += Nb) { //iterate over the given key vector

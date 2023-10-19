@@ -175,20 +175,20 @@ const unsigned char AES::GaloisMult[15][256] = {
 /// </summary>
 /// <param name="int blockSize"></param>
 void AES::SetOperationMode(const int blockSize) {
-    if (blockSize == 128) { //if blockSize is 128
+    if (blockSize == 16) { //if blockSize is 16 bytes (128 bits)
         AES::Nk = 4; //number of 32-bit words in the key (AES-128)
         AES::Nr = 10; //number of rounds (AES-128 has 10 rounds)
     }
-    else if (blockSize == 192) { //if blockSize is 192
+    else if (blockSize == 24) { //if blockSize is 24 bytes (192 bits)
         AES::Nk = 6; //number of 32-bit words in the key (AES-192)
         AES::Nr = 12; //number of rounds (AES-192 has 12 rounds)
     }
-    else if (blockSize == 256) { //if blockSize is 256
+    else if (blockSize == 32) { //if blockSize is 32 bytes (256 bits)
         AES::Nk = 8; //number of 32-bit words in the key (AES-256)
         AES::Nr = 14; //number of rounds (AES-256 has 14 rounds)
     }
     else //else blockSize isn't valid
-        throw runtime_error("Invalid mode of operation."); //we throw a runtime error
+        throw runtime_error("Invalid mode of operation, please provide key that matches AES requirements."); //we throw a runtime error
 }
 
 
@@ -452,7 +452,7 @@ int main() {
     //};
 
     vector<unsigned char> key(16, 0x00);
-    //AES::SetOperationMode(256);
+    //AES::SetOperationMode(key.size());
     vector<vector<unsigned char>> keys = AES::KeySchedule(key);
     AES::PrintMatrix(keys);
     

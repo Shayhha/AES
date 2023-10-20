@@ -336,8 +336,7 @@ const vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const 
     vector<unsigned char> temp(Nb); //temp vector represents current column values 
     if (!inverse) { //perform mix columns for encryption
         for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
-            for (size_t j = 0; j < Nb; ++j) //copy the columns values to temp vector
-                temp[j] = state[i + j]; //set column values
+            copy(state.begin() + i, state.begin() + i + Nb, temp.begin()); //copy the columns values to temp vector
 
             //apply Galois field equations for each byte in state vector
             state[i + 0] = (unsigned char)(GaloisMult[2][temp[0]] ^ GaloisMult[3][temp[1]] ^ temp[2] ^ temp[3]);
@@ -348,8 +347,7 @@ const vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const 
     }
     else { //perform mix columns for decryption
         for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
-            for (size_t j = 0; j < Nb; ++j) //copy the columns values to temp vector
-                temp[j] = state[i + j]; //set column values
+            copy(state.begin() + i, state.begin() + i + Nb, temp.begin()); //copy the columns values to temp vector
 
             //apply Galois field equations for each byte in state vector
             state[i + 0] = (unsigned char)(GaloisMult[14][temp[0]] ^ GaloisMult[11][temp[1]] ^ GaloisMult[13][temp[2]] ^ GaloisMult[9][temp[3]]);

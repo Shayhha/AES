@@ -333,9 +333,12 @@ const vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const b
 /// <param name="bool inverse"></param>
 /// <returns>vector&lt;unsigned char&gt; mixedState</returns>
 const vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const bool inverse) {
+    vector<unsigned char> temp(Nb); //temp vector represents current column values 
     if (!inverse) { //perform mix columns for encryption
         for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
-            vector<unsigned char> temp{ state[i + 0], state[i + 1], state[i + 2], state[i + 3] }; //temp vector represents current column values 
+            for (size_t j = 0; j < Nb; ++j) //copy the columns values to temp vector
+                temp[j] = state[i + j]; //set column values
+
             //apply Galois field equations for each byte in state vector
             state[i + 0] = (unsigned char)(GaloisMult[2][temp[0]] ^ GaloisMult[3][temp[1]] ^ temp[2] ^ temp[3]);
             state[i + 1] = (unsigned char)(temp[0] ^ GaloisMult[2][temp[1]] ^ GaloisMult[3][temp[2]] ^ temp[3]);
@@ -345,7 +348,9 @@ const vector<unsigned char> AES::MixColumns(vector<unsigned char>& state, const 
     }
     else { //perform mix columns for decryption
         for (size_t i = 0; i < BlockSize; i += Nb) { //iterate over state vector
-            vector<unsigned char> temp{ state[i + 0], state[i + 1], state[i + 2], state[i + 3] }; //temp vector represents current column values 
+            for (size_t j = 0; j < Nb; ++j) //copy the columns values to temp vector
+                temp[j] = state[i + j]; //set column values
+
             //apply Galois field equations for each byte in state vector
             state[i + 0] = (unsigned char)(GaloisMult[14][temp[0]] ^ GaloisMult[11][temp[1]] ^ GaloisMult[13][temp[2]] ^ GaloisMult[9][temp[3]]);
             state[i + 1] = (unsigned char)(GaloisMult[9][temp[0]] ^ GaloisMult[14][temp[1]] ^ GaloisMult[11][temp[2]] ^ GaloisMult[13][temp[3]]);
@@ -393,8 +398,7 @@ const vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned
     vector<vector<unsigned char>> KeyWordArray; //initialize new vector
     KeyWordArray.reserve(key.size() / Nb); //reserve memory for blocks 
     for (size_t i = 0; i < key.size(); i += Nb) { //iterate over the given key vector
-        vector<unsigned char> block(key.begin() + i, key.begin() + i + Nb); //split the vector into blocks
-        KeyWordArray.push_back(block); //push the block to the new vector
+        KeyWordArray.emplace_back(key.begin() + i, key.begin() + i + Nb); //split the vector into blocks and insert into KeyWordArray
     }
     return KeyWordArray; //return the new vector
 }
@@ -406,16 +410,19 @@ const vector<vector<unsigned char>> AES::SplitIntoKeyWords(const vector<unsigned
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <returns>vector&lt;vector&lt;unsigned char&gt;&gt; roundKeys</returns>
 const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>& key) {
-    vector<vector<unsigned char>> roundKeysMatrix; //initialize the matrix of round keys (each represented as a vector of unsigned char)
+    vector<vector<unsigned char>> roundKeysMatrix; //represents the matrix of round keys (each represented as a vector of unsigned char)
+    vector<unsigned char> roundKeysVector; //represents new round keys vector
+    vector<unsigned char> previousKey(Nb * Nk); //represents previous round key
+    vector<vector<unsigned char>> currentWord(Nk, vector<unsigned char>(Nb)); //represents current key in progress
+    vector<unsigned char> temp(Nb); //represents temporary vector for key schedule operations
     roundKeysMatrix.reserve(Nr + 1); //reserve memory for our keys in advance for better performance
-    vector<unsigned char> roundKeysVector; //initialize new round keys vector
-    copy(key.begin(), key.end(), back_inserter(roundKeysVector)); //add initial key to roundKey vector
+    copy(key.begin(), key.end(), back_inserter(roundKeysVector)); //add initial key to roundKeyVector
 
     //iterate over the round keys vector in the specified number of rounds and generate round keys
     for (int i = 1; i <= Nr; i++) {
-        vector<unsigned char> previousKey(roundKeysVector.begin() + roundKeysVector.size() - (Nb * Nk), roundKeysVector.end()); //retrieve previous key from roundKeysVector
-        vector<vector<unsigned char>> currentWord = SplitIntoKeyWords(previousKey); //split key into 32-bit keywords for ease of use
-        vector<unsigned char> temp = SubWord(RotWord(currentWord[Nk - 1])); //apply SubWord and RotWord operation on current word and save it in temp vector
+        copy(roundKeysVector.end() - (Nb * Nk), roundKeysVector.end(), previousKey.begin()); //retrieve previous key from roundKeysVector
+        currentWord = SplitIntoKeyWords(previousKey); //split key into 32-bit keywords for ease of use
+        temp = SubWord(RotWord(currentWord[Nk - 1])); //apply SubWord and RotWord operation on current word and save it in temp vector
         temp[0] ^= Rcon(i); //XOR temp vector with Rcon value 
         //now we need to iterate over Nk (number of keywords) to generate the key
         for (int j = 0; j < Nk; j++) {
@@ -428,10 +435,8 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
     roundKeysVector.erase(roundKeysVector.begin() + (Nr + 1) * BlockSize, roundKeysVector.end()); //remove the extra bytes if present (on AES-192 and AES-256)
 
     //finally we add roundKeysVector keys to roundKeysMatrix for later use in AES encryption
-    for (size_t i = 0; i < roundKeysVector.size(); i += BlockSize) { //iterate over our round keys vector 
-        vector<unsigned char> key(roundKeysVector.begin() + i, roundKeysVector.begin() + min(roundKeysVector.size(), i + BlockSize)); //getting each key (128-bit) from beginning of vector
-        roundKeysMatrix.push_back(key); //add key to the matrix
-    }
+    for (size_t i = 0; i < roundKeysVector.size(); i += BlockSize) //iterate over roundKeysVector
+        roundKeysMatrix.emplace_back(roundKeysVector.begin() + i, roundKeysVector.begin() + min(roundKeysVector.size(), i + BlockSize)); //getting each key (128-bit) from beginning of vector and adding it to roundKeysMatrix
 
     return roundKeysMatrix; //return our roundKeysMatrix for AES operation
 }
@@ -493,6 +498,50 @@ const vector<unsigned char> AES::Decrypt(vector<unsigned char>& text, const vect
 }
 
 
+/// <summary>
+/// Function that performs AES encryption in ECB mode on given text using specified key. 
+/// <para>ECB mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
+/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; key"></param>
+/// <returns>vector&lt;unsigned char&gt; cipherText</returns>
+const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
+    size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+    text.insert(text.end(), padding, static_cast<unsigned char>(padding)); //append the padding bytes to the text
+    vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
+    for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
+        copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
+        temp = AES::Encrypt(temp, key); //encrypt the block using our AES Encrypt function
+        for (size_t j = 0; j < 16; j++) //replace the original block in the input text with the encrypted block
+            text[i + j] = temp[j]; //set the encrypted values into text vector
+    }
+    return text; //return ciphered text
+}
+
+
+/// <summary>
+/// Function that performs AES decryption in ECB mode on given text using specified key.
+/// <para>ECB mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
+/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; key"></param>
+/// <returns>vector&lt;unsigned char&gt; decipherText</returns>
+const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
+    vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
+    for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
+        copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
+        temp = AES::Decrypt(temp, key); //decrypt the block using our AES Decrypt function
+        for (size_t j = 0; j < BlockSize; j++) //replace the original block in the input text with the decrypted block
+            text[i + j] = temp[j]; //set the decrypted values into text vector
+    }
+    size_t padding = text.back(); //check last byte value to determine how many bytes to remove
+    text.resize(text.size() - padding); //remove padding from text
+    return text; //return deciphered text
+}
+
+
 
 int main() {
     ///test key schedule///
@@ -507,11 +556,11 @@ int main() {
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
     vector<unsigned char> keyVec(key.begin(), key.end());
     try {
-        plaintextVec = AES::Encrypt(plaintextVec, keyVec);
+        plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
         cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
         cout << "Original Text:" << endl;
-        plaintextVec = AES::Decrypt(plaintextVec, keyVec);
+        plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());
         cout << str << endl;

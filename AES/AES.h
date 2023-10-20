@@ -35,6 +35,8 @@ protected:
 public:
 	static const vector<unsigned char> Encrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
 	static const vector<unsigned char> Decrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
+	static const vector<unsigned char> Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key);
+	static const vector<unsigned char> Decrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key);
 	static void PrintVector(const vector<unsigned char>& vector);
 	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
 };

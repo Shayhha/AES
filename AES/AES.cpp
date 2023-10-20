@@ -505,9 +505,11 @@ const vector<unsigned char> AES::Decrypt(vector<unsigned char>& text, const vect
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
 const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
-    size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
-    text.insert(text.end(), padding, static_cast<unsigned char>(padding)); //append the padding bytes to the text
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
+    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
+        size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+        text.insert(text.end(), padding, (unsigned char)padding); //append the padding bytes to the text
+    }
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         temp = Encrypt(temp, key); //encrypt the block using our AES Encrypt function
@@ -532,8 +534,9 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
         temp = Decrypt(temp, key); //decrypt the block using our AES Decrypt function
         copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the decrypted block
     }
-    size_t padding = text.back(); //check last byte value to determine how many bytes to remove
-    text.resize(text.size() - padding); //remove padding from text
+    size_t padding = text.back(); //get the value of the last byte, which indicates the padding size
+    if (padding > 0 && padding <= BlockSize) //if true we have padding bytes to remove for text
+        text.resize(text.size() - padding); //remove the padding bytes from the text
     return text; //return deciphered text
 }
 
@@ -548,10 +551,12 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
 /// <param name="vector&lt;unsigned char&gt; iv"></param>
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
 const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
-    size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
-    text.insert(text.end(), padding, static_cast<unsigned char>(padding)); //append the padding bytes to the text
     vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
     vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
+    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
+        size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+        text.insert(text.end(), padding, (unsigned char)padding); //append the padding bytes to the text
+    }
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         temp = XOR(temp, previousCipher); //XOR with previous cipher block

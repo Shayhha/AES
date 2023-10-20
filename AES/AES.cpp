@@ -544,13 +544,15 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
 /// <summary>
 /// Function that performs AES encryption in CBC mode on given text using specified key and initialization vector. 
 /// <para>CBC mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
-/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// <para>This function throws runtime error if given text, key or iv are invalid.</para>
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; text"></param>
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <param name="vector&lt;unsigned char&gt; iv"></param>
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
 const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
+    if (iv.size() != BlockSize) //if iv vector isn't in correct size
+        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
     vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
     vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
     if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
@@ -571,14 +573,30 @@ const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const 
 /// <summary>
 /// Function that performs AES decryption in CBC mode on given text using specified key and initialization vector. 
 /// <para>CBC mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
-/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// <para>This function throws runtime error if given text, key or iv are invalid.</para>
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; text"></param>
 /// <param name="vector&lt;unsigned char&gt; key"></param>
 /// <param name="vector&lt;unsigned char&gt; iv"></param>
 /// <returns>vector&lt;unsigned char&gt; decipherText</returns>
 const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
-    return text; //TODO//
+    if (iv.size() != BlockSize) //if iv vector isn't in correct size
+        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
+    vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
+    vector<unsigned char> cipherBlock(BlockSize); //represents current cipher block for decryption process
+    vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
+    for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
+        copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
+        cipherBlock = temp; //save the current cipher block
+        temp = Decrypt(temp, key); //decrypt the block using our AES Decrypt function
+        temp = XOR(temp, previousCipher); //XOR with previous cipher block
+        copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the decrypted block
+        previousCipher = cipherBlock; //update previous cipher block with current cipher block
+    }
+    size_t padding = text.back(); //get the value of the last byte, which indicates the padding size
+    if (padding > 0 && padding <= BlockSize) //if true we have padding bytes to remove for text
+        text.resize(text.size() - padding); //remove the padding bytes from the text
+    return text; //return deciphered text
 }
 
 
@@ -593,14 +611,19 @@ int main() {
     ///test AES encryption and decryption///
     string plaintext = "TheKingOfNewYork";
     string key = "PopSmokeTheWoo55";
+    string iv = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
     vector<unsigned char> keyVec(key.begin(), key.end());
+    vector<unsigned char> ivVec(iv.begin(), iv.end());
+    AES::PrintVector(plaintextVec);
     try {
-        plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
+        //plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
+        plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
         cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
         cout << "Original Text:" << endl;
-        plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
+        //plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
+        plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());
         cout << str << endl;

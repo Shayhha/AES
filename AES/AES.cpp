@@ -512,7 +512,7 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
-        temp = AES::Encrypt(temp, key); //encrypt the block using our AES Encrypt function
+        temp = Encrypt(temp, key); //encrypt the block using our AES Encrypt function
         for (size_t j = 0; j < 16; j++) //replace the original block in the input text with the encrypted block
             text[i + j] = temp[j]; //set the encrypted values into text vector
     }
@@ -532,7 +532,7 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
-        temp = AES::Decrypt(temp, key); //decrypt the block using our AES Decrypt function
+        temp = Decrypt(temp, key); //decrypt the block using our AES Decrypt function
         for (size_t j = 0; j < BlockSize; j++) //replace the original block in the input text with the decrypted block
             text[i + j] = temp[j]; //set the decrypted values into text vector
     }

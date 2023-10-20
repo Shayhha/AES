@@ -513,8 +513,7 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         temp = Encrypt(temp, key); //encrypt the block using our AES Encrypt function
-        for (size_t j = 0; j < 16; j++) //replace the original block in the input text with the encrypted block
-            text[i + j] = temp[j]; //set the encrypted values into text vector
+        copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the encrypted block
     }
     return text; //return ciphered text
 }
@@ -533,12 +532,50 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         temp = Decrypt(temp, key); //decrypt the block using our AES Decrypt function
-        for (size_t j = 0; j < BlockSize; j++) //replace the original block in the input text with the decrypted block
-            text[i + j] = temp[j]; //set the decrypted values into text vector
+        copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the decrypted block
     }
     size_t padding = text.back(); //check last byte value to determine how many bytes to remove
     text.resize(text.size() - padding); //remove padding from text
     return text; //return deciphered text
+}
+
+
+/// <summary>
+/// Function that performs AES encryption in CBC mode on given text using specified key and initialization vector. 
+/// <para>CBC mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
+/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; key"></param>
+/// <param name="vector&lt;unsigned char&gt; iv"></param>
+/// <returns>vector&lt;unsigned char&gt; cipherText</returns>
+const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
+    size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+    text.insert(text.end(), padding, static_cast<unsigned char>(padding)); //append the padding bytes to the text
+    vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
+    vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
+    for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
+        copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
+        temp = XOR(temp, previousCipher); //XOR with previous cipher block
+        temp = Encrypt(temp, key); //encrypt the block using our AES Encrypt function
+        copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the encrypted block
+        previousCipher = temp; //update previous cipher block
+    }
+    return text; //return ciphered text
+}
+
+
+/// <summary>
+/// Function that performs AES decryption in CBC mode on given text using specified key and initialization vector. 
+/// <para>CBC mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
+/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// </summary>
+/// <param name="vector&lt;unsigned char&gt; text"></param>
+/// <param name="vector&lt;unsigned char&gt; key"></param>
+/// <param name="vector&lt;unsigned char&gt; iv"></param>
+/// <returns>vector&lt;unsigned char&gt; decipherText</returns>
+const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
+    return text; //TODO//
 }
 
 

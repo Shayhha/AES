@@ -39,7 +39,7 @@ The library detects the AES key size (128, 192, or 256 bits) based on the length
 #include "AES.h"
 
 int main() {
-    ///test AES encryption and decryption///
+    ///Test AES encryption and decryption///
     string plaintext = "TheKingOfNewYork";
     string key = "PopSmokeTheWoo55";
     string iv = "PopSmokeTheWoo55";

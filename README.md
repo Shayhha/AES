@@ -52,8 +52,8 @@ int main() {
         plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
         cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
-        cout << "Original Text:" << endl;
         plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
+        cout << "Original Text:" << endl;
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());
         cout << str << endl;

@@ -721,12 +721,13 @@ int main() {
     //AES::PrintMatrix(keys);
 
     ///test AES encryption and decryption///
-    string plaintext = "TheKingOfNewYork";
+    string plaintext = "TheKingOfNewYorkdssdsdsdsdssds";
     string key = "PopSmokeTheWoo55";
     string iv = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
     vector<unsigned char> keyVec(key.begin(), key.end());
     vector<unsigned char> ivVec(iv.begin(), iv.end());
+    cout << "Plaintext:" << endl;
     AES::PrintVector(plaintextVec);
     try {
         //plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);

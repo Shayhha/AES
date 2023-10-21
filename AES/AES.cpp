@@ -721,7 +721,7 @@ int main() {
     //AES::PrintMatrix(keys);
 
     ///test AES encryption and decryption///
-    string plaintext = "TheKingOfNewYorkdssdsdsdsdssds";
+    string plaintext = "TheKingOfNewYork";
     string key = "PopSmokeTheWoo55";
     string iv = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());

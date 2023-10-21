@@ -2,8 +2,8 @@
 
 
 //set default values of Nk and Nr to AES-128
-int AES::Nk = 4; //number of 32-bit words in the key (AES-128)
-int AES::Nr = 10; //number of rounds (AES-128 has 10 rounds)
+size_t AES::Nk = 4; //number of 32-bit words in the key (AES-128)
+size_t AES::Nr = 10; //number of rounds (AES-128 has 10 rounds)
 
 
 /// <summary>

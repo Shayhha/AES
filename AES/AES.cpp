@@ -442,6 +442,7 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
 
 /// <summary>
 /// Function that performs AES encryption on given text using specified key, supports AES-128, AES-192 and AES-256. 
+/// <para>This function performs AES encryption with fixed block size of 16 bytes (128-bit).</para>
 /// <para>This function throws runtime error if given text or key are invalid.</para>
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; text"></param>
@@ -470,6 +471,7 @@ const vector<unsigned char> AES::Encrypt(vector<unsigned char>& text, const vect
 
 /// <summary>
 /// Function that performs AES decryption on given text using specified key, supports AES-128, AES-192 and AES-256. 
+/// <para>This function performs AES decryption with fixed block size of 16 bytes (128-bit).</para>
 /// <para>This function throws runtime error if given text or key are invalid.</para>
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; text"></param>
@@ -612,8 +614,8 @@ const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const 
 const vector<unsigned char> AES::Encrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     if (iv.size() != BlockSize) //if iv vector isn't in correct size
         throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
-    vector<unsigned char> temp = iv; //initialize temp vector for cipher block
-    vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector with IV vector
+    vector<unsigned char> temp = iv; //initialize temp vector for cipher block with IV vector
+    vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector
     size_t j = 0; //represents the size of previousCipher block, we use it as an index for performing XOR with each cipher block
     for (size_t i = 0; i < text.size(); i++) { //iterate over text
         if (i == 0 || j == BlockSize) { //if we are in first iteration or when j equals to block size (16 bytes)
@@ -641,8 +643,8 @@ const vector<unsigned char> AES::Encrypt_CFB(vector<unsigned char>& text, const 
 const vector<unsigned char> AES::Decrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     if (iv.size() != BlockSize) //if iv vector isn't in correct size
         throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
-    vector<unsigned char> temp = iv; //initialize temp vector for cipher block
-    vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector with IV vector
+    vector<unsigned char> temp = iv; //initialize temp vector for cipher block with IV vector
+    vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector 
     size_t j = 0; //represents the size of previousCipher block, we use it as an index for performing XOR with each cipher block
     for (size_t i = 0; i < text.size(); i++) { //iterate over text
         if (i == 0 || j == BlockSize) { //if we are in first iteration or when j equals to block size (16 bytes)
@@ -729,15 +731,15 @@ int main() {
     try {
         //plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
-        plaintextVec = AES::Encrypt_CFB(plaintextVec, keyVec, ivVec);
-        //plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
+        //plaintextVec = AES::Encrypt_CFB(plaintextVec, keyVec, ivVec);
+        plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
         cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
         cout << "Original Text:" << endl;
         //plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
-        plaintextVec = AES::Decrypt_CFB(plaintextVec, keyVec, ivVec);
-        //plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
+        //plaintextVec = AES::Decrypt_CFB(plaintextVec, keyVec, ivVec);
+        plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());
         cout << str << endl;

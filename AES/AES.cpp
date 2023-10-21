@@ -807,7 +807,7 @@ int main() {
         //plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Decrypt_CFB(plaintextVec, keyVec, ivVec);
-        //plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);z
+        //plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
         plaintextVec = AES::Decrypt_CTR(plaintextVec, keyVec, ivVec);
         AES::PrintVector(plaintextVec);
         string str(plaintextVec.begin(), plaintextVec.end());

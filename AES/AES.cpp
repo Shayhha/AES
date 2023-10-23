@@ -550,7 +550,7 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
 /// <summary>
 /// Function that performs AES decryption in ECB mode on given text using specified key.
 /// <para>ECB mode supports AES-128, AES-192 and AES-256, includes PKCS7 padding.</para> 
-/// <para>This function throws runtime error if given text or key are invalid.</para>
+/// <para>This function throws runtime error if given text and key are invalid.</para>
 /// </summary>
 /// <param name="vector&lt;unsigned char&gt; text"></param>
 /// <param name="vector&lt;unsigned char&gt; key"></param>
@@ -840,7 +840,7 @@ int main() {
     //AES::PrintMatrix(keys);
 
     ///test AES encryption and decryption///
-    string plaintext = "TheKingOfNewYorkTheKingOfNewYork";
+    string plaintext = "TheKingOfNewYork";
     string key = "PopSmokeTheWoo55";
     string iv = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());

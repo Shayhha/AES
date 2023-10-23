@@ -21,8 +21,10 @@ private:
 	static const size_t BlockSize = Nb * Nb; //represents the size of AES block that is always 16 bytes (128-bit)
 
 protected:
+	static const vector<unsigned char> EncryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
+	static const vector<unsigned char> DecryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
 	static const vector<vector<unsigned char>> KeySchedule(const vector<unsigned char>& key);
-	static void SetOperationMode(const size_t textSize, const size_t keySize);
+	static void SetOperationMode(const size_t keySize);
 	static const vector<unsigned char> RotWord(const vector<unsigned char>& word);
 	static const vector<unsigned char> SubWord(const vector<unsigned char>& word);
 	static const unsigned char Rcon(const unsigned char& value);

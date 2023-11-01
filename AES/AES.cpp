@@ -867,7 +867,8 @@ int main() {
         cout << str << endl;
     }
     catch (const runtime_error& e) {
-        cout << e.what() << endl;
+        cerr << e.what() << endl;
+        return 1;
     }
 
     return 0;

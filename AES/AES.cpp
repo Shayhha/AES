@@ -531,12 +531,12 @@ const vector<unsigned char> AES::Decrypt(vector<unsigned char>& text, const vect
 /// <returns>vector&lt;unsigned char&gt; cipherText</returns>
 const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
+    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
+        unsigned char padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+        text.insert(text.end(), padding, padding); //append the padding bytes to the text
+    }
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
-    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
-        size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
-        text.insert(text.end(), padding, (unsigned char)padding); //append the padding bytes to the text
-    }
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         EncryptBlock(temp, roundKeys); //encrypt the block using our AES EncryptBlock function using round keys
@@ -557,6 +557,8 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
 /// <returns>vector&lt;unsigned char&gt; decipherText</returns>
 const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
+    if (text.size() % BlockSize != 0) //if text size isn't multiply of 16 bytes
+        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES ECB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
@@ -564,8 +566,8 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
         DecryptBlock(temp, roundKeys); //decrypt the block using our AES DecryptBlock function using round keys
         copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the decrypted block
     }
-    size_t padding = text.back(); //get the value of the last byte, which indicates the padding size
-    if (padding > 0 && padding <= BlockSize) //if true we have padding bytes to remove for text
+    unsigned char padding = text.back(); //get the value of the last byte, which indicates the padding size
+    if (padding > 0 && padding <= BlockSize && padding < text.size()) //if true we have padding bytes to remove from text
         text.resize(text.size() - padding); //remove the padding bytes from the text
     roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
     return text; //return deciphered text
@@ -585,13 +587,13 @@ const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const 
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
         throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
+    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
+        unsigned char padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
+        text.insert(text.end(), padding, padding); //append the padding bytes to the text
+    }
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
     vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
-    if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
-        size_t padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
-        text.insert(text.end(), padding, (unsigned char)padding); //append the padding bytes to the text
-    }
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
         copy(text.begin() + i, text.begin() + i + BlockSize, temp.begin()); //extract block from the input
         XOR(temp, previousCipher); //XOR with previous cipher block
@@ -617,6 +619,8 @@ const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const 
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
         throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
+    if (text.size() % BlockSize != 0) //if text size isn't multiply of 16 bytes
+        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES CBC requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
     vector<unsigned char> cipherBlock(BlockSize); //represents current cipher block for decryption process
@@ -629,8 +633,8 @@ const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const 
         copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the decrypted block
         previousCipher = cipherBlock; //update previous cipher block with current cipher block
     }
-    size_t padding = text.back(); //get the value of the last byte, which indicates the padding size
-    if (padding > 0 && padding <= BlockSize) //if true we have padding bytes to remove for text
+    unsigned char padding = text.back(); //get the value of the last byte, which indicates the padding size
+    if (padding > 0 && padding <= BlockSize && padding < text.size()) //if true we have padding bytes to remove from text
         text.resize(text.size() - padding); //remove the padding bytes from the text
     roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
     return text; //return deciphered text

@@ -193,11 +193,11 @@ void AES::SetOperationMode(const size_t keySize) {
 
 
 /**
- * @brief • Function for generating a vector.
+ * @brief • Function for creating a vector.
  * @param • size_t vecSize
  * @return • vector<unsigned char> vector
  */
-const vector<unsigned char> AES::GenerateVector(const size_t vecSize) {
+const vector<unsigned char> AES::Create_Vector(const size_t vecSize) {
     random_device randomDevice; //create seed for random generator
     mt19937 generator(randomDevice()); //create instance for generator
     uniform_int_distribution<> charDistribution(32, 126); //create instance for unsigned char generator
@@ -211,26 +211,26 @@ const vector<unsigned char> AES::GenerateVector(const size_t vecSize) {
 
 
 /**
- * @brief • Function for generating an AES key.
+ * @brief • Function for creating an AES key.
  * @brief • Supports AES-128, AES-192 and AES-256 keys.
  * @brief • Returns default AES-128 key if invalid size given.
  * @param • size_t keySize
  * @return • vector<unsigned char> key
  */
-const vector<unsigned char> AES::GenerateKey(const size_t keySize) {
+const vector<unsigned char> AES::Create_Key(const size_t keySize) {
     if (keySize == 128 || keySize == 192 || keySize == 256) //if keySize is valid AES key size
-        return GenerateVector(keySize / (AES::Nb * 2)); //return the key with our GenerateVector function
+        return Create_Vector(keySize / (AES::Nb * 2)); //return the key with our Create_Vector function
     else  //else keySize isn't valid AES key size
-        return GenerateVector(128 / (AES::Nb * 2)); //return default AES-128 key with our GenerateVector function
+        return Create_Vector(128 / (AES::Nb * 2)); //return default AES-128 key with our Create_Vector function
 }
 
 
 /**
- * @brief • Function for generating an initialization vector.
+ * @brief • Function for creating an initialization vector.
  * @return • vector<unsigned char> iv
  */
-const vector<unsigned char> AES::GenerateIV() {
-    return GenerateVector(128 / (AES::Nb * 2)); //return initialization vector with our GenerateVector function
+const vector<unsigned char> AES::Create_IV() {
+    return Create_Vector(128 / (AES::Nb * 2)); //return initialization vector with our Create_Vector function
 }
 
 
@@ -920,8 +920,8 @@ int main() {
     ///test AES encryption and decryption///
     string plaintext = "TheKingOfNewYork";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
-    vector<unsigned char> keyVec = AES::GenerateKey(128);
-    vector<unsigned char> ivVec = AES::GenerateIV();
+    vector<unsigned char> keyVec = AES::Create_Key(128);
+    vector<unsigned char> ivVec = AES::Create_IV();
     cout << "Plaintext:" << endl;
     AES::PrintVector(plaintextVec);
     try {

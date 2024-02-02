@@ -312,26 +312,26 @@ public:
 	static const vector<unsigned char> Decrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
 	/**
-	 * @brief • Function for generating a vector.
+	 * @brief • Function for creating a vector.
 	 * @param • size_t vecSize
 	 * @return • vector<unsigned char> vector
 	 */
-	static const vector<unsigned char> GenerateVector(const size_t vecSize);
+	static const vector<unsigned char> Create_Vector(const size_t vecSize);
 
 	/**
-	 * @brief • Function for generating an AES key.
+	 * @brief • Function for creating an AES key.
 	 * @brief • Supports AES-128, AES-192 and AES-256 keys.
 	 * @brief • Returns default AES-128 key if invalid size given.
 	 * @param • size_t keySize
 	 * @return • vector<unsigned char> key
 	 */
-	static const vector<unsigned char> GenerateKey(const size_t keySize);
+	static const vector<unsigned char> Create_Key(const size_t keySize);
 
 	/**
-	 * @brief • Function for generating an initialization vector.
+	 * @brief • Function for creating an initialization vector.
 	 * @return • vector<unsigned char> iv
 	 */
-	static const vector<unsigned char> GenerateIV();
+	static const vector<unsigned char> Create_IV();
 
 	/**
 	 * @brief • Function for printing a vector in hexadecimal.

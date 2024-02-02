@@ -193,7 +193,49 @@ void AES::SetOperationMode(const size_t keySize) {
 
 
 /**
- * @brief • Function for printing a vector array.
+ * @brief • Function for generating a vector.
+ * @param • size_t vecSize
+ * @return • vector<unsigned char> vector
+ */
+const vector<unsigned char> AES::GenerateVector(const size_t vecSize) {
+    random_device randomDevice; //create seed for random generator
+    mt19937 generator(randomDevice()); //create instance for generator
+    uniform_int_distribution<> charDistribution(32, 126); //create instance for unsigned char generator
+
+    vector<unsigned char> vector(vecSize); //create vector of desired size
+    for (size_t i = 0; i < vecSize; i++) //iterate over the vector
+        vector[i] = (unsigned char)charDistribution(generator); //insert random byte to vector using our charDistribution generator
+
+    return vector; //return the vector
+}
+
+
+/**
+ * @brief • Function for generating an AES key.
+ * @brief • Supports AES-128, AES-192 and AES-256 keys.
+ * @brief • Returns default AES-128 key if invalid size given.
+ * @param • size_t keySize
+ * @return • vector<unsigned char> key
+ */
+const vector<unsigned char> AES::GenerateKey(const size_t keySize) {
+    if (keySize == 128 || keySize == 192 || keySize == 256) //if keySize is valid AES key size
+        return GenerateVector(keySize / (AES::Nb * 2)); //return the key with our GenerateVector function
+    else  //else keySize isn't valid AES key size
+        return GenerateVector(128 / (AES::Nb * 2)); //return default AES-128 key with our GenerateVector function
+}
+
+
+/**
+ * @brief • Function for generating an initialization vector.
+ * @return • vector<unsigned char> iv
+ */
+const vector<unsigned char> AES::GenerateIV() {
+    return GenerateVector(128 / (AES::Nb * 2)); //return initialization vector with our GenerateVector function
+}
+
+
+/**
+ * @brief • Function for printing a vector in hexadecimal.
  * @param • vector<unsigned char> vector
  */
 void AES::PrintVector(const vector<unsigned char>& vector) {
@@ -204,7 +246,7 @@ void AES::PrintVector(const vector<unsigned char>& vector) {
 
 
 /**
- * @brief • Function for printing a matrix represented as vector of vectors.
+ * @brief • Function for printing a matrix represented as vector of vectors in hexadecimal.
  * @param • vector<vector<unsigned char>> matrix
  */
 void AES::PrintMatrix(const vector<vector<unsigned char>>& matrix) {
@@ -877,20 +919,18 @@ int main() {
 
     ///test AES encryption and decryption///
     string plaintext = "TheKingOfNewYork";
-    string key = "PopSmokeTheWoo55";
-    string iv = "PopSmokeTheWoo55";
     vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
-    vector<unsigned char> keyVec(key.begin(), key.end());
-    vector<unsigned char> ivVec(iv.begin(), iv.end());
+    vector<unsigned char> keyVec = AES::GenerateKey(128);
+    vector<unsigned char> ivVec = AES::GenerateIV();
     cout << "Plaintext:" << endl;
     AES::PrintVector(plaintextVec);
     try {
+        cout << "Cipher:" << endl;
         //plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Encrypt_CFB(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Encrypt_OFB(plaintextVec, keyVec, ivVec);
         plaintextVec = AES::Encrypt_CTR(plaintextVec, keyVec, ivVec);
-        cout << "Cipher:" << endl;
         AES::PrintVector(plaintextVec);
         cout << "Original Text:" << endl;
         //plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);

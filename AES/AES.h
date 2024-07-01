@@ -62,7 +62,6 @@ protected:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<vector<unsigned char>> roundKeys
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
 	 */
 	static const vector<unsigned char> EncryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
 
@@ -72,7 +71,6 @@ protected:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<vector<unsigned char>> roundKeys
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
 	 */
 	static const vector<unsigned char> DecryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
 
@@ -94,14 +92,14 @@ protected:
 	 * @param • vector<unsigned char> word
 	 * @return • vector<unsigned char> rotatedWord
 	 */
-	static const vector<unsigned char> RotWord(const vector<unsigned char>& word);
+	static const vector<unsigned char> RotWord(vector<unsigned char>& word);
 
 	/**
 	 * @brief • Function that substitutes each byte in a word using the SBOX.
 	 * @param • vector<unsigned char> word
 	 * @return • vector<unsigned char> subWord
 	 */
-	static const vector<unsigned char> SubWord(const vector<unsigned char>& word);
+	static const vector<unsigned char> SubWord(vector<unsigned char>& word);
 
 	/**
 	 * @brief • Function that returns the Rcon value given original value for key schedule.
@@ -142,13 +140,6 @@ protected:
 	 * @return • vector<unsigned char> xor
 	 */
 	static const vector<unsigned char> XOR(vector<unsigned char>& first, const vector<unsigned char>& second, const bool immutable = false);
-
-	/**
-	 * @brief • Function that splits given vector into AES blocks (4 bytes).
-	 * @param • vector<unsigned char> key
-	 * @return • vector<vector<unsigned char>> splitKey
-	 */
-	static const vector<vector<unsigned char>> SplitIntoKeyWords(const vector<unsigned char>& key);
 
 public:
 	/**
@@ -312,37 +303,49 @@ public:
 	static const vector<unsigned char> Decrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
 	/**
-	 * @brief • Function for generating a vector.
+	 * @brief • Function for creating a vector.
 	 * @param • size_t vecSize
-	 * @return • vector<unsigned char> vector
+	 * @return • vector<unsigned char> vec
 	 */
-	static const vector<unsigned char> GenerateVector(const size_t vecSize);
+	static const vector<unsigned char> Create_Vector(const size_t vecSize);
 
 	/**
-	 * @brief • Function for generating an AES key.
+	 * @brief • Function for creating an AES key.
 	 * @brief • Supports AES-128, AES-192 and AES-256 keys.
 	 * @brief • Returns default AES-128 key if invalid size given.
 	 * @param • size_t keySize
 	 * @return • vector<unsigned char> key
 	 */
-	static const vector<unsigned char> GenerateKey(const size_t keySize);
+	static const vector<unsigned char> Create_Key(const size_t keySize = 128);
 
 	/**
-	 * @brief • Function for generating an initialization vector.
+	 * @brief • Function for creating an initialization vector.
 	 * @return • vector<unsigned char> iv
 	 */
-	static const vector<unsigned char> GenerateIV();
+	static const vector<unsigned char> Create_IV();
+
+	/**
+	 * @brief • Function for clearing a vector security.
+	 * @param • vector<unsigned char> vec
+	 */
+	static void ClearVector(vector<unsigned char>& vec);
+
+	/**
+	 * @brief • Function for clearing a vector of vectors security.
+	 * @param • vector<vector<unsigned char>> vec
+	 */
+	static void ClearVector(vector<vector<unsigned char>>& vec);
 
 	/**
 	 * @brief • Function for printing a vector in hexadecimal.
-	 * @param • vector<unsigned char> vector
+	 * @param • vector<unsigned char> vec
 	 */
-	static void PrintVector(const vector<unsigned char>& vector);
+	static void PrintVector(const vector<unsigned char>& vec);
 
 	/**
-	 * @brief • Function for printing a matrix represented as vector of vectors in hexadecimal.
-	 * @param • vector<vector<unsigned char>> matrix
+	 * @brief • Function for printing a vector of vectors in hexadecimal.
+	 * @param • vector<vector<unsigned char>> vec
 	 */
-	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
+	static void PrintVector(const vector<vector<unsigned char>>& vec);
 };
 #endif

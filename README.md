@@ -39,26 +39,23 @@ The library detects the AES key size (128, 192, or 256 bits) based on the length
 #include "AES.h"
 
 int main() {
-    ///Test AES encryption and decryption///
-    string plaintext = "TheKingOfNewYork";
-    string key = "PopSmokeTheWoo55";
-    string iv = "PopSmokeTheWoo55";
-    vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
-    vector<unsigned char> keyVec(key.begin(), key.end());
-    vector<unsigned char> ivVec(iv.begin(), iv.end());
-    cout << "Plaintext:" << endl;
-    AES::PrintVector(plaintextVec);
     try {
+        ///Test AES encryption and decryption///
+        string plaintext = "TheKingOfNewYork";
+        vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
+        vector<unsigned char> keyVec = AES::Create_Key(128);
+        vector<unsigned char> ivVec = AES::Create_IV(16);
+        cout << "Plain Text:" << endl;
+        cout << AES::VectorToHex(plaintextVec) << endl;
+        cout << "Cipher Text:" << endl;
         plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
-        cout << "Cipher:" << endl;
-        AES::PrintVector(plaintextVec);
-        plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
+        cout << AES::VectorToHex(plaintextVec) << endl;
         cout << "Original Text:" << endl;
+        plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
+        cout << AES::VectorToHex(plaintextVec) << endl;
         AES::PrintVector(plaintextVec);
-        string str(plaintextVec.begin(), plaintextVec.end());
-        cout << str << endl;
     }
-    catch (const runtime_error& e) {
+    catch (const invalid_argument& e) {
         cerr << e.what() << endl;
         return 1;
     }

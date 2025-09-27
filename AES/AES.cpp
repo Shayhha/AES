@@ -188,31 +188,134 @@ void AES::SetOperationMode(const size_t keySize) {
         AES::Nr = 14; //number of rounds (AES-256 has 14 rounds)
     }
     else //else keySize isn't valid
-        throw runtime_error("Invalid mode of operation, please provide valid key that matches AES requirements."); //we throw a runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid key that matches AES requirements."); //we throw a runtime error
 }
 
 
 /**
- * @brief • Function for printing a vector array.
- * @param • vector<unsigned char> vector
+ * @brief • Function for creating a vector of random bytes.
+ * @param • size_t vecSize
+ * @return • vector<unsigned char> vec
  */
-void AES::PrintVector(const vector<unsigned char>& vector) {
-    for (unsigned char element : vector) // iterate through each element
-        cout << hex << setw(2) << setfill('0') << (int)element << " "; //set the output stream to hexadecimal mode
+vector<unsigned char> AES::Create_Vector(const size_t vecSize) {
+    random_device randomDevice; //create random device for generating random bytes
+    vector<unsigned char> vec(vecSize); //create vector of desired size
+    for (size_t i = 0; i < vecSize; i++) //iterate over the vector
+        vec[i] = (unsigned char)(randomDevice() & 0xFF); //insert random byte to vector using random device
+    return vec; //return the vector
+}
+
+
+/**
+ * @brief • Function for creating an AES key.
+ * @brief • Supports AES-128, AES-192 and AES-256 keys.
+ * @brief • Returns default AES-128 key if no arguments given.
+ * @param • size_t keySize
+ * @return • vector<unsigned char> key
+ */
+vector<unsigned char> AES::Create_Key(const size_t keySize) {
+    vector<unsigned char> key; //create key vector
+    if (keySize == 128 || keySize == 192 || keySize == 256) //if keySize is valid AES key size
+        key = Create_Vector(keySize / (Nb * 2)); //we create key vector with keySize
+    else //else keySize isn't valid AES key size
+        key = Create_Vector(128 / (Nb * 2)); //we create key vector with AES-128 key size
+    return key; //return key vector
+}
+
+
+/**
+ * @brief • Function for creating an initialization vector.
+ * @brief • Supports zero padding for various IV sizes.
+ * @brief • Returns default AES IV if no arguments given.
+ * @param • size_t ivSize
+ * @return • vector<unsigned char> iv
+ */
+vector<unsigned char> AES::Create_IV(const size_t ivSize) {
+    vector<unsigned char> iv; //create IV vector
+    if (ivSize <= BlockSize) //if ivSize is valid AES IV size
+        iv = Create_Vector(ivSize); //we create IV vector with given ivSize
+    else //else ivSize isn't valid AES IV size
+        iv = Create_Vector(BlockSize); //we create IV vector with BlockSize
+    iv.resize(BlockSize, 0x00); //resize IV vector to BlockSize and add zero padding if necessary
+    return iv; //return IV vector
+}
+
+
+/**
+ * @brief • Function for converting vector of bytes to hexadecimal string representation.
+ * @param • vector<unsigned char> vec
+ * @return • string hex
+ */
+string AES::VectorToHex(const vector<unsigned char>& vec) {
+    const string hexChars = "0123456789abcdef"; //hex characters for conversion
+    string result; //create result string
+    result.reserve(vec.size() * 2); //reserve memory for result string
+    for (const unsigned char& byte : vec) { //iterate through each byte in the vector
+        result.push_back(hexChars[byte >> 4]); //append the left 4 bits as a hex character
+        result.push_back(hexChars[byte & 0x0F]); //append the right 4 bits as a hex character
+    }
+    return result; //return the result string
+}
+
+
+/**
+ * @brief • Function for converting hexadecimal string to vector of bytes representation.
+ * @param • string hex
+ * @return • vector<unsigned char> vec
+ * @throws • invalid_argument thrown if given hex is invalid.
+ */
+vector<unsigned char> AES::HexToVector(const string& hex) {
+    if (hex.size() % 2 != 0) //if hex string has odd length
+        throw invalid_argument("Hex string must have even length."); //throw invalid argument
+    vector<unsigned char> result; //create result vector
+    result.reserve(hex.size() / 2); //reserve memory for result vector
+    for (size_t i = 0; i < hex.size(); i += 2) { //iterate through each hex string two characters at a time
+        unsigned char byte = (unsigned char)stoi(hex.substr(i, 2), NULL, 16); //convert substring of two chars to a byte
+        result.push_back(byte); //append the byte to result vector
+    }
+    return result; //return the result vector
+}
+
+
+/**
+ * @brief • Function for clearing a vector securly.
+ * @param • vector<unsigned char> vec
+ */
+void AES::ClearVector(vector<unsigned char>& vec) {
+    fill(vec.begin(), vec.end(), 0x00); //fill vector with zeros 
+    vec.clear(); //clear vector for added security after finishing operations
+}
+
+
+/**
+ * @brief • Function for clearing a vector of vectors securly.
+ * @param • vector<vector<unsigned char>> vec
+ */
+void AES::ClearVector(vector<vector<unsigned char>>& vec) {
+    for (vector<unsigned char>& innerVec : vec) //iterate through each innerVec in vector
+        ClearVector(innerVec); //clear each innerVec 
+    vec.clear(); //clear vector for added security after finishing operations
+}
+
+
+/**
+ * @brief • Function for printing a vector of bytes as characters.
+ * @param • vector<unsigned char> vec
+ */
+void AES::PrintVector(const vector<unsigned char>& vec) {
+    for (const unsigned char& byte : vec) //iterate through each byte in vector
+        cout << byte; //print byte as character
     cout << endl; //new line
 }
 
 
 /**
- * @brief • Function for printing a matrix represented as vector of vectors.
- * @param • vector<vector<unsigned char>> matrix
+ * @brief • Function for printing a vector of vectors of bytes as characters.
+ * @param • vector<vector<unsigned char>> vec
  */
-void AES::PrintMatrix(const vector<vector<unsigned char>>& matrix) {
-    for (const vector<unsigned char>& row : matrix) {
-        for (unsigned char element : row) //iterate through the inner vector (row)
-            cout << hex << setw(2) << setfill('0') << (int)element << " "; //set the output stream to hexadecimal mode
-        cout << dec << endl; //restore the output stream to decimal mode after each row
-    }
+void AES::PrintVector(const vector<vector<unsigned char>>& vec) {
+    for (const vector<unsigned char>& innerVec : vec) //iterate through each innerVec in vector
+        PrintVector(innerVec); //print innerVec as characters
     cout << endl; //new line
 }
 
@@ -240,7 +343,7 @@ const vector<unsigned char> AES::RotWord(const vector<unsigned char>& word) {
  */
 const vector<unsigned char> AES::SubWord(const vector<unsigned char>& word) {
     vector<unsigned char> result(Nb); //initialize a vector of size Nb
-    for (int i = 0; i < Nb; i++) { //iterate over the word
+    for (size_t i = 0; i < Nb; i++) { //iterate over the word
         //we set the value from SBOX with right rotating by 4 to extract the left value and OR with 0x0F for extracting the right value
         result[i] = SBOX[word[i] >> 4][word[i] & 0x0F]; //set the value from the SBOX
     }
@@ -254,14 +357,15 @@ const vector<unsigned char> AES::SubWord(const vector<unsigned char>& word) {
  * @return • unsigned char rconValue
  */
 const unsigned char AES::Rcon(const unsigned char& value) {
-    unsigned char result = 0x01; //initialize with 0x01 (first round constant)
-    for (int i = 1; i < value; i++) {
-        if (result & 0x80) //if the leftmost bit (0x80) is set
-            result = (result << 1) ^ 0x11B; //XOR with 0x11B after left shifting
+    if (value == 0) return 0x00; //if value is 0 we return 0x00
+    unsigned char rconValue = 0x01; //initialize with 0x01 (first round constant)
+    for (size_t i = 1; i < value; i++) {
+        if (rconValue & 0x80) //if the leftmost bit (0x80) is set
+            rconValue = (rconValue << 1) ^ 0x1B; //XOR with 0x1B after left shifting
         else //else we left shift 
-            result = result << 1; //left shift the result by one
+            rconValue = rconValue << 1; //left shift by one
     }
-    return result; //return rcon value
+    return rconValue; //return rcon value
 }
 
 
@@ -293,24 +397,24 @@ const vector<unsigned char> AES::SubBytes(vector<unsigned char>& state, const bo
 const vector<unsigned char> AES::ShiftRows(vector<unsigned char>& state, const bool inverse) {
     if (!inverse) { //perform shift rows for encryption
         //swap elements in second row
-        for (int i = 1; i <= 9; i += Nb) //iterate on second row
+        for (size_t i = 1; i <= 9; i += Nb) //iterate on second row
             swap(state[i], state[i + Nb]); //swap elements
         //swap elements in third row
-        for (int i = 2; i <= 6; i += Nb) //iterate on third row
+        for (size_t i = 2; i <= 6; i += Nb) //iterate on third row
             swap(state[i], state[i + (Nb * 2)]); //swap elements
         //swap elements in fourth row
-        for (int i = 15; i >= 7; i -= Nb) //iterate on fourth row
+        for (size_t i = 15; i >= 7; i -= Nb) //iterate on fourth row
             swap(state[i], state[i - Nb]); //swap elements
     }
     else { //perform inverse shift rows for decryption
         //swap elements in second row
-        for (int i = 13; i >= 5; i -= Nb) //iterate on second row
+        for (size_t i = 13; i >= 5; i -= Nb) //iterate on second row
             swap(state[i], state[i - Nb]); // swap elements
         //swap elements in third row
-        for (int i = 2; i <= 6; i += Nb) //iterate on third row
+        for (size_t i = 2; i <= 6; i += Nb) //iterate on third row
             swap(state[i], state[i + (Nb * 2)]); //swap elements
         //swap elements in fourth row
-        for (int i = 3; i <= 11; i += Nb) //iterate on fourth row
+        for (size_t i = 3; i <= 11; i += Nb) //iterate on fourth row
             swap(state[i], state[i + Nb]); //swap elements
     }
     return state; //return shifted state vector
@@ -408,11 +512,11 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
     copy(key.begin(), key.end(), back_inserter(roundKeysVector)); //add initial key to roundKeyVector
 
     //iterate over the round keys vector in the specified number of rounds and generate round keys
-    for (int i = 1; i <= Nr; i++) {
+    for (size_t i = 1; i <= Nr; i++) {
         copy(roundKeysVector.end() - (Nb * Nk), roundKeysVector.end(), previousKey.begin()); //retrieve previous key from roundKeysVector
         currentWord = SplitIntoKeyWords(previousKey); //split key into 32-bit keywords for ease of use
         temp = SubWord(RotWord(currentWord[Nk - 1])); //apply SubWord and RotWord operation on current word and save it in temp vector
-        temp[0] ^= Rcon(i); //XOR temp vector with Rcon value 
+        temp[0] ^= Rcon((unsigned char)i); //XOR temp vector with Rcon value 
         //now we need to iterate over Nk (number of keywords) to generate the key
         for (int j = 0; j < Nk; j++) {
             temp = XOR(temp, currentWord[j]); //call our XOR function to apply XOR operation on temp and currentWord vectors
@@ -437,15 +541,15 @@ const vector<vector<unsigned char>> AES::KeySchedule(const vector<unsigned char>
  * @param • vector<unsigned char> text
  * @param • vector<vector<unsigned char>> roundKeys
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
  */
 const vector<unsigned char> AES::EncryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys) {
     if(text.size() != BlockSize) //if plaintext isn't valid we throw runtime error
-        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES requirements."); //throw a runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid plaintext that matches AES requirements."); //throw a runtime error
     //apply initial round key
     XOR(text, roundKeys[0]); //perform first AddRoundKey operation on text
     //apply AES operations of SubByte, ShiftRows, MixColumns and AddRoundKey
-    for (int i = 1; i < Nr; i++) { //iterate over roundKeys and apply AES operations
+    for (size_t i = 1; i < Nr; i++) { //iterate over roundKeys and apply AES operations
         SubBytes(text, false); //perform SubBytes operation on text
         ShiftRows(text, false); //perform ShiftRows operation on text
         MixColumns(text, false); //perform MixColumns operation on text
@@ -465,17 +569,17 @@ const vector<unsigned char> AES::EncryptBlock(vector<unsigned char>& text, const
  * @param • vector<unsigned char> text
  * @param • vector<vector<unsigned char>> roundKeys
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
  */
 const vector<unsigned char> AES::DecryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys) {
     if (text.size() != BlockSize) //if plaintext isn't valid we throw runtime error
-        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES requirements."); //throw a runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid plaintext that matches AES requirements."); //throw a runtime error
     //apply AES final round operations in reverse order of AddRoundKey, ShiftRows and SubBytes
     XOR(text, roundKeys[Nr]); //perform AddRoundKey operation on text
     ShiftRows(text, true); //perform ShiftRows operation on text
     SubBytes(text, true); //perform SubBytes operation on text
     //apply AES operations in reverse order of AddRoundKey, MixColumns, ShiftRows and SubBytes
-    for (int i = Nr - 1; i >= 1; i--) { //iterate over roundKeys in reverse order and apply AES operations
+    for (size_t i = Nr - 1; i >= 1; i--) { //iterate over roundKeys in reverse order and apply AES operations
         XOR(text, roundKeys[i]); //perform AddRoundKey operation on text
         MixColumns(text, true); //perform MixColumns operation on text
         ShiftRows(text, true); //perform ShiftRows operation on text
@@ -493,14 +597,14 @@ const vector<unsigned char> AES::DecryptBlock(vector<unsigned char>& text, const
  * @param • vector<unsigned char> text
  * @param • vector<unsigned char> key
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
  */
 const vector<unsigned char> AES::Encrypt(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     EncryptBlock(text, roundKeys); //call our AES EncryptBlock function for encrypting text using round keys
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -511,14 +615,14 @@ const vector<unsigned char> AES::Encrypt(vector<unsigned char>& text, const vect
  * @param • vector<unsigned char> text
  * @param • vector<unsigned char> key
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
  */
 const vector<unsigned char> AES::Decrypt(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     DecryptBlock(text, roundKeys); //call our AES DecryptBlock function for decrypting text using round keys
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return deciphered text
 }
 
@@ -530,8 +634,8 @@ const vector<unsigned char> AES::Decrypt(vector<unsigned char>& text, const vect
  * @param • vector<unsigned char> text
  * @param • vector<unsigned char> key
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
  */
 const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
@@ -546,7 +650,7 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
         EncryptBlock(temp, roundKeys); //encrypt the block using our AES EncryptBlock function using round keys
         copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the encrypted block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -559,13 +663,13 @@ const vector<unsigned char> AES::Encrypt_ECB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> text
  * @param • vector<unsigned char> key
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
  */
 const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (text.size() % BlockSize != 0) //if text size isn't multiply of 16 bytes
-        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES ECB requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid plaintext that matches AES ECB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for ECB operation
     for (size_t i = 0; i < text.size(); i += BlockSize) { //iterate over text
@@ -576,7 +680,7 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
     unsigned char padding = text.back(); //get the value of the last byte, which indicates the padding size
     if (padding > 0 && padding <= BlockSize && padding < text.size()) //if true we have padding bytes to remove from text
         text.resize(text.size() - padding); //remove the padding bytes from the text
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return deciphered text
 }
 
@@ -589,14 +693,14 @@ const vector<unsigned char> AES::Decrypt_ECB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
     if (text.size() % BlockSize != 0) { //if text size isn't multiply of 16 bytes we add padding
         unsigned char padding = BlockSize - (text.size() % BlockSize); //calculate the number of padding bytes needed
         text.insert(text.end(), padding, padding); //append the padding bytes to the text
@@ -611,7 +715,7 @@ const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const 
         copy(temp.begin(), temp.end(), text.begin() + i); //replace the original block in the input text with the encrypted block
         previousCipher = temp; //update previous cipher block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -625,16 +729,16 @@ const vector<unsigned char> AES::Encrypt_CBC(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CBC requirements."); //throw runtime error
     if (text.size() % BlockSize != 0) //if text size isn't multiply of 16 bytes
-        throw runtime_error("Invalid mode of operation, please provide valid plaintext that matches AES CBC requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid plaintext that matches AES CBC requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp(BlockSize); //represents temp vector for CBC operation
     vector<unsigned char> cipherBlock(BlockSize); //represents current cipher block for decryption process
@@ -650,7 +754,7 @@ const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const 
     unsigned char padding = text.back(); //get the value of the last byte, which indicates the padding size
     if (padding > 0 && padding <= BlockSize && padding < text.size()) //if true we have padding bytes to remove from text
         text.resize(text.size() - padding); //remove the padding bytes from the text
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations 
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations 
     return text; //return deciphered text
 }
 
@@ -663,14 +767,14 @@ const vector<unsigned char> AES::Decrypt_CBC(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Encrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp = iv; //initialize temp vector for cipher block with IV vector
     vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector
@@ -685,7 +789,7 @@ const vector<unsigned char> AES::Encrypt_CFB(vector<unsigned char>& text, const 
         temp[j] = text[i]; //update temp with the new ciphered text
         j++; //increase j index for previousCipher block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -698,14 +802,14 @@ const vector<unsigned char> AES::Encrypt_CFB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Decrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CFB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> temp = iv; //initialize temp vector for cipher block with IV vector
     vector<unsigned char> previousCipher(BlockSize); //initialize previousCipher vector 
@@ -720,7 +824,7 @@ const vector<unsigned char> AES::Decrypt_CFB(vector<unsigned char>& text, const 
         text[i] ^= previousCipher[j]; //perform byte XOR between text and previousCipher block
         j++; //increase j index for previousCipher block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return deciphered text
 }
 
@@ -733,14 +837,14 @@ const vector<unsigned char> AES::Decrypt_CFB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Encrypt_OFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES OFB requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES OFB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
     size_t j = 0; //represents the size of previousCipher block, we use it as an index for performing XOR with each cipher block
@@ -752,7 +856,7 @@ const vector<unsigned char> AES::Encrypt_OFB(vector<unsigned char>& text, const 
         text[i] ^= previousCipher[j]; //perform byte XOR between text and previousCipher block
         j++; //increase j index for previousCipher block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -765,14 +869,14 @@ const vector<unsigned char> AES::Encrypt_OFB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Decrypt_OFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES OFB requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES OFB requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> previousCipher = iv; //initialize previousCipher vector with IV vector
     size_t j = 0; //represents the size of previousCipher block, we use it as an index for performing XOR with each cipher block
@@ -784,7 +888,7 @@ const vector<unsigned char> AES::Decrypt_OFB(vector<unsigned char>& text, const 
         text[i] ^= previousCipher[j]; //perform byte XOR between text and previousCipher block
         j++; //increase j index for previousCipher block
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return deciphered text
 }
 
@@ -797,14 +901,14 @@ const vector<unsigned char> AES::Decrypt_OFB(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> cipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Encrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CTR requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CTR requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> tempIV = iv; //initialize tempIV vector for cipher block with IV vector
     vector<unsigned char> currentIV(BlockSize); //initialize currentIV vector
@@ -823,7 +927,7 @@ const vector<unsigned char> AES::Encrypt_CTR(vector<unsigned char>& text, const 
                 if (tempIV[k]++) break; //increment temp[k] and break if it's not zero
         }
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return ciphered text
 }
 
@@ -836,14 +940,14 @@ const vector<unsigned char> AES::Encrypt_CTR(vector<unsigned char>& text, const 
  * @param • vector<unsigned char> key
  * @param • vector<unsigned char> iv
  * @return • vector<unsigned char> decipherText
- * @throws • runtime_error thrown if given text is invalid.
- * @throws • runtime_error thrown if given key is invalid.
- * @throws • runtime_error thrown if given iv is invalid.
+ * @throws • invalid_argument thrown if given text is invalid.
+ * @throws • invalid_argument thrown if given key is invalid.
+ * @throws • invalid_argument thrown if given iv is invalid.
  */
 const vector<unsigned char> AES::Decrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
     SetOperationMode(key.size()); //call our SetOperationMode function to check the key and set correct AES mode, throws runtime error if key invalid
     if (iv.size() != BlockSize) //if IV vector isn't in correct size
-        throw runtime_error("Invalid mode of operation, please provide valid initialization vector that matches AES CTR requirements."); //throw runtime error
+        throw invalid_argument("Invalid mode of operation, please provide valid initialization vector that matches AES CTR requirements."); //throw runtime error
     vector<vector<unsigned char>> roundKeys = KeySchedule(key); //call our KeySchedule function for generating round keys
     vector<unsigned char> tempIV = iv; //initialize tempIV vector for cipher block with IV vector
     vector<unsigned char> currentIV(BlockSize); //initialize currentIV vector
@@ -862,47 +966,47 @@ const vector<unsigned char> AES::Decrypt_CTR(vector<unsigned char>& text, const 
                 if (tempIV[k]++) break; //increment temp[k] and break if it's not zero
         }
     }
-    roundKeys.clear(); //clear our roundKeys matrix for added security after we finish operations
+    ClearVector(roundKeys); //clear our roundKeys for added security after we finish operations
     return text; //return deciphered text
 }
 
 
 
 int main() {
-    ///test key schedule///
-    //vector<unsigned char> key1(16, 0x00);
-    //AES::SetOperationMode(16, key.size());
-    //vector<vector<unsigned char>> keys = AES::KeySchedule(key1);
-    //AES::PrintMatrix(keys);
-
-    ///test AES encryption and decryption///
-    string plaintext = "TheKingOfNewYork";
-    string key = "PopSmokeTheWoo55";
-    string iv = "PopSmokeTheWoo55";
-    vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
-    vector<unsigned char> keyVec(key.begin(), key.end());
-    vector<unsigned char> ivVec(iv.begin(), iv.end());
-    cout << "Plaintext:" << endl;
-    AES::PrintVector(plaintextVec);
     try {
+        ///test key schedule///
+        //vector<unsigned char> key1(16, 0x00);
+        //AES::SetOperationMode(key1.size());
+        //vector<vector<unsigned char>> keys = AES::KeySchedule(key1);
+        //cout << "Round Keys:" << endl;
+        //for (const vector<unsigned char>& key : keys)
+        //    cout << AES::VectorToHex(key) << endl;
+        //cout << endl;
+
+        ///test AES encryption and decryption///
+        string plaintext = "TheKingOfNewYork";
+        vector<unsigned char> plaintextVec(plaintext.begin(), plaintext.end());
+        vector<unsigned char> keyVec = AES::Create_Key(128);
+        vector<unsigned char> ivVec = AES::Create_IV(8);
+        cout << "Plain Text:" << endl;
+        cout << AES::VectorToHex(plaintextVec) << endl;
+        cout << "Cipher Text:" << endl;
         //plaintextVec = AES::Encrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Encrypt_CBC(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Encrypt_CFB(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Encrypt_OFB(plaintextVec, keyVec, ivVec);
         plaintextVec = AES::Encrypt_CTR(plaintextVec, keyVec, ivVec);
-        cout << "Cipher:" << endl;
-        AES::PrintVector(plaintextVec);
+        cout << AES::VectorToHex(plaintextVec) << endl;
         cout << "Original Text:" << endl;
         //plaintextVec = AES::Decrypt_ECB(plaintextVec, keyVec);
         //plaintextVec = AES::Decrypt_CBC(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Decrypt_CFB(plaintextVec, keyVec, ivVec);
         //plaintextVec = AES::Decrypt_OFB(plaintextVec, keyVec, ivVec);
         plaintextVec = AES::Decrypt_CTR(plaintextVec, keyVec, ivVec);
+        cout << AES::VectorToHex(plaintextVec) << endl;
         AES::PrintVector(plaintextVec);
-        string str(plaintextVec.begin(), plaintextVec.end());
-        cout << str << endl;
     }
-    catch (const runtime_error& e) {
+    catch (const invalid_argument& e) {
         cerr << e.what() << endl;
         return 1;
     }

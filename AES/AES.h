@@ -2,11 +2,9 @@
 #define _AES_H
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <vector>
-#include <fstream>
-#include <cstdlib>
-#include <iomanip> 
+#include <random>
 
 using namespace std;
 
@@ -61,7 +59,7 @@ protected:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<vector<unsigned char>> roundKeys
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
 	 */
 	static const vector<unsigned char> EncryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
 
@@ -71,7 +69,7 @@ protected:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<vector<unsigned char>> roundKeys
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
 	 */
 	static const vector<unsigned char> DecryptBlock(vector<unsigned char>& text, const vector<vector<unsigned char>>& roundKeys);
 
@@ -156,8 +154,8 @@ public:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<unsigned char> key
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
 	 */
 	static const vector<unsigned char> Encrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
 
@@ -167,8 +165,8 @@ public:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<unsigned char> key
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
 	 */
 	static const vector<unsigned char> Decrypt(vector<unsigned char>& text, const vector<unsigned char>& key);
 
@@ -179,8 +177,8 @@ public:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<unsigned char> key
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
 	 */
 	static const vector<unsigned char> Encrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key);
 
@@ -192,8 +190,8 @@ public:
 	 * @param • vector<unsigned char> text
 	 * @param • vector<unsigned char> key
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
 	 */
 	static const vector<unsigned char> Decrypt_ECB(vector<unsigned char>& text, const vector<unsigned char>& key);
 
@@ -205,9 +203,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Encrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -220,9 +218,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Decrypt_CBC(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -234,9 +232,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Encrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -248,9 +246,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Decrypt_CFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -262,9 +260,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Encrypt_OFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -276,9 +274,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Decrypt_OFB(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -290,9 +288,9 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> cipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Encrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
@@ -304,22 +302,74 @@ public:
 	 * @param • vector<unsigned char> key
 	 * @param • vector<unsigned char> iv
 	 * @return • vector<unsigned char> decipherText
-	 * @throws • runtime_error thrown if given text is invalid.
-	 * @throws • runtime_error thrown if given key is invalid.
-	 * @throws • runtime_error thrown if given iv is invalid.
+	 * @throws • invalid_argument thrown if given text is invalid.
+	 * @throws • invalid_argument thrown if given key is invalid.
+	 * @throws • invalid_argument thrown if given iv is invalid.
 	 */
 	static const vector<unsigned char> Decrypt_CTR(vector<unsigned char>& text, const vector<unsigned char>& key, const vector<unsigned char>& iv);
 
 	/**
-	 * @brief • Function for printing a vector array.
-	 * @param • vector<unsigned char> vector
+	 * @brief • Function for creating a vector of random bytes.
+	 * @param • size_t vecSize
+	 * @return • vector<unsigned char> vec
 	 */
-	static void PrintVector(const vector<unsigned char>& vector);
+	static vector<unsigned char> Create_Vector(const size_t vecSize);
 
 	/**
-	 * @brief • Function for printing a matrix represented as vector of vectors.
-	 * @param • vector<vector<unsigned char>> matrix
+	 * @brief • Function for creating an AES key.
+	 * @brief • Supports AES-128, AES-192 and AES-256 keys.
+	 * @brief • Returns default AES-128 key if no arguments given.
+	 * @param • size_t keySize
+	 * @return • vector<unsigned char> key
 	 */
-	static void PrintMatrix(const vector<vector<unsigned char>>& matrix);
+	static vector<unsigned char> Create_Key(const size_t keySize = 128);
+
+	/**
+	 * @brief • Function for creating an initialization vector.
+	 * @brief • Supports zero padding for various IV sizes.
+	 * @brief • Returns default AES IV if no arguments given.
+	 * @param • size_t ivSize
+	 * @return • vector<unsigned char> iv
+	 */
+	static vector<unsigned char> Create_IV(const size_t ivSize = 16);
+
+	/**
+	 * @brief • Function for converting vector of bytes to hexadecimal string representation.
+	 * @param • vector<unsigned char> vec
+	 * @return • string hex
+	 */
+	static string VectorToHex(const vector<unsigned char>& vec);
+
+	/**
+	 * @brief • Function for converting hexadecimal string to vector of bytes representation.
+	 * @param • string hex
+	 * @return • vector<unsigned char> vec
+	 * @throws • invalid_argument thrown if given hex is invalid.
+	 */
+	static vector<unsigned char> HexToVector(const string& hex);
+
+	/**
+	 * @brief • Function for clearing a vector securly.
+	 * @param • vector<unsigned char> vec
+	 */
+	static void ClearVector(vector<unsigned char>& vec);
+
+	/**
+	 * @brief • Function for clearing a vector of vectors securly.
+	 * @param • vector<vector<unsigned char>> vec
+	 */
+	static void ClearVector(vector<vector<unsigned char>>& vec);
+
+	/**
+	 * @brief • Function for printing a vector of bytes as characters.
+	 * @param • vector<unsigned char> vec
+	 */
+	static void PrintVector(const vector<unsigned char>& vec);
+
+	/**
+	 * @brief • Function for printing a vector of vectors of bytes as characters.
+	 * @param • vector<vector<unsigned char>> vec
+	 */
+	static void PrintVector(const vector<vector<unsigned char>>& vec);
 };
 #endif
